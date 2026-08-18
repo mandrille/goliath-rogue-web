@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GoliathRogue — crash log</title>
+<style>
+  body { margin:0; padding:14px; background:#14121a; color:#e6e2f0;
+         font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+  h1 { font-size:19px; margin:0 0 4px; color:#ffd76a; }
+  p  { margin:0 0 12px; color:#a49fb4; font-size:13px; }
+  .row { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+  button { flex:1 1 auto; min-height:46px; padding:0 16px; font-size:15px; font-weight:600;
+           border-radius:8px; border:2px solid #6de08a; background:#1b2e21; color:#8fe8a5; }
+  button.warn { border-color:#e0706d; background:#2e1b1d; color:#f0928f; }
+  pre { white-space:pre-wrap; word-break:break-word; background:#0c0b11; border:1px solid #2e2a3a;
+        border-radius:8px; padding:10px; font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;
+        color:#cfc9e0; max-height:65vh; overflow:auto; }
+  .bad { color:#ff8f8a; }
+</style>
+</head>
+<body>
+<h1>GoliathRogue — crash log</h1>
+<p>Tap <b>Copy</b>, then paste it to the developer. This is stored only on your device.</p>
+<div class="row">
+  <button onclick="copyLog()">Copy</button>
+  <button class="warn" onclick="clearLog()">Clear</button>
+</div>
+<pre id="out">loading…</pre>
+<script>
+function load() {
+  var log = [];
+  try { log = JSON.parse(localStorage.getItem("gr_log") || "[]"); } catch (e) {}
+  var running = null;
+  try { running = localStorage.getItem("gr_running"); } catch (e) {}
+  var head = "";
+  if (running === "1") head = "NOTE: a session is still marked running — if the game is closed, it crashed.\n\n";
+  var el = document.getElementById("out");
+  el.textContent = log.length ? head + log.join("\n") : "No log yet. Play until it crashes, then come back here.";
+  if (!log.length) el.className = "bad";
+  return el.textContent;
+}
+function copyLog() {
+  var t = document.getElementById("out").textContent;
+  if (navigator.clipboard) navigator.clipboard.writeText(t).then(function(){ alert("Copied — paste it to the dev."); },
+                                                               function(){ selectAll(); });
+  else selectAll();
+}
+function selectAll() {
+  var r = document.createRange(); r.selectNodeContents(document.getElementById("out"));
+  var s = getSelection(); s.removeAllRanges(); s.addRange(r);
+  alert("Select-all done — long-press and Copy.");
+}
+function clearLog() {
+  try { localStorage.removeItem("gr_log"); localStorage.removeItem("gr_running"); } catch (e) {}
+  load();
+}
+load();
+</script>
+</body>
+</html>
